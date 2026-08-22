@@ -7,44 +7,40 @@
 <meta name="apple-mobile-web-app-status-bar-style" content="default">
 <meta name="apple-mobile-web-app-title" content="Workout">
 <meta name="color-scheme" content="light dark">
-<meta name="theme-color" content="#f7f6f2" media="(prefers-color-scheme: light)">
-<meta name="theme-color" content="#16170f" media="(prefers-color-scheme: dark)">
+<meta name="theme-color" content="#f4f1e8" media="(prefers-color-scheme: light)">
+<meta name="theme-color" content="#14150f" media="(prefers-color-scheme: dark)">
 <title>Workout Checklist</title>
 <style>
   :root {
-    --bg: #f7f6f2;
-    --bg-soft: #efeee7;
-    --card: #ffffff;
-    --border: #e3e1d8;
-    --border-strong: #d4d1c4;
-    --text: #2c2c2a;
-    --text-secondary: #6b6a63;
-    --text-faint: #96958c;
+    --paper: #f4f1e8;
+    --paper-2: #ece8db;
+    --ink: #23231f;
+    --ink-2: #6a685d;
+    --ink-3: #9b998c;
+    --rule: #d8d3c2;
+    --rule-soft: #e4e0d1;
     --accent: #3b6d11;
-    --accent-soft: #5c8f2c;
-    --accent-bg: #eaf3de;
-    --done-bg: #f2f6ec;
-    --done-border: #c9e0a6;
-    --shadow: 0 1px 2px rgba(44, 44, 42, 0.04), 0 4px 12px rgba(44, 44, 42, 0.05);
-    --shadow-done: 0 1px 2px rgba(59, 109, 17, 0.05);
+    --accent-2: #5b8f2b;
+    --wash: #e9efdc;
+    --clay: #a8642f;
+    --grain: 0.055;
+    --stamp-ring: #f4f1e8;
   }
   @media (prefers-color-scheme: dark) {
     :root {
-      --bg: #16170f;
-      --bg-soft: #1c1e15;
-      --card: #21231a;
-      --border: #33362a;
-      --border-strong: #434737;
-      --text: #eeecdf;
-      --text-secondary: #9d9c8e;
-      --text-faint: #7a7a6e;
-      --accent: #9ed35f;
-      --accent-soft: #85bb47;
-      --accent-bg: #242e18;
-      --done-bg: #1d2416;
-      --done-border: #3c5426;
-      --shadow: 0 1px 2px rgba(0, 0, 0, 0.3), 0 4px 12px rgba(0, 0, 0, 0.22);
-      --shadow-done: 0 1px 2px rgba(0, 0, 0, 0.25);
+      --paper: #14150f;
+      --paper-2: #1b1d14;
+      --ink: #efece0;
+      --ink-2: #9d9b8d;
+      --ink-3: #74736a;
+      --rule: #33362a;
+      --rule-soft: #272a1f;
+      --accent: #a4da62;
+      --accent-2: #8cc248;
+      --wash: #1f2716;
+      --clay: #cf8a4e;
+      --grain: 0.045;
+      --stamp-ring: #14150f;
     }
   }
 
@@ -52,220 +48,262 @@
   html, body {
     margin: 0;
     padding: 0;
-    background: var(--bg);
-    color: var(--text);
+    background: var(--paper);
+    color: var(--ink);
     font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
     -webkit-font-smoothing: antialiased;
-    text-rendering: optimizeLegibility;
   }
   body {
     min-height: 100vh;
-    padding: max(24px, env(safe-area-inset-top)) 16px calc(96px + env(safe-area-inset-bottom));
-    max-width: 560px;
+    padding: max(26px, env(safe-area-inset-top)) 20px calc(104px + env(safe-area-inset-bottom));
+    max-width: 540px;
     margin: 0 auto;
   }
 
-  /* ---- header ---- */
+  /* Paper grain, laid over everything and inert to taps. */
+  .grain {
+    position: fixed;
+    inset: 0;
+    pointer-events: none;
+    z-index: 100;
+    opacity: var(--grain);
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='140' height='140'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='140' height='140' filter='url(%23n)'/%3E%3C/svg%3E");
+  }
+
+  .serif {
+    font-family: "Iowan Old Style", "Palatino Linotype", Palatino, "Book Antiqua", Georgia, serif;
+  }
+  .caps {
+    text-transform: uppercase;
+    letter-spacing: 0.13em;
+    font-size: 10.5px;
+    font-weight: 650;
+  }
+
+  /* ---- masthead ---- */
   header {
     display: flex;
     justify-content: space-between;
-    align-items: center;
-    gap: 16px;
-    margin-bottom: 26px;
+    align-items: flex-end;
+    gap: 18px;
   }
-  .title-block { min-width: 0; }
   h1 {
-    font-size: 26px;
-    font-weight: 650;
-    letter-spacing: -0.021em;
+    font-size: 34px;
+    font-weight: 400;
+    line-height: 1.02;
+    letter-spacing: -0.018em;
     margin: 0;
-    line-height: 1.15;
+  }
+  h1 em {
+    font-style: italic;
+    color: var(--accent);
   }
   .date {
-    font-size: 14px;
-    color: var(--text-faint);
-    margin-top: 5px;
-    letter-spacing: -0.003em;
+    margin-top: 9px;
+    color: var(--ink-3);
   }
-
-  .ring {
+  .score {
     flex: none;
-    position: relative;
-    width: 56px;
-    height: 56px;
-  }
-  .ring svg {
-    width: 100%;
-    height: 100%;
-    transform: rotate(-90deg);
-  }
-  .ring-track {
-    fill: none;
-    stroke: var(--border);
-    stroke-width: 4;
-  }
-  .ring-fill {
-    fill: none;
-    stroke: var(--accent);
-    stroke-width: 4;
-    stroke-linecap: round;
-    stroke-dasharray: 125.664;
-    stroke-dashoffset: 125.664;
-    transition: stroke-dashoffset 0.45s cubic-bezier(0.4, 0, 0.2, 1);
-  }
-  .ring-label {
-    position: absolute;
-    inset: 0;
     display: flex;
-    align-items: center;
-    justify-content: center;
-    font-size: 13px;
-    font-weight: 600;
+    align-items: baseline;
+    gap: 1px;
+    font-size: 30px;
+    line-height: 1;
     font-variant-numeric: tabular-nums;
     letter-spacing: -0.02em;
-    color: var(--text-secondary);
+  }
+  .score-done { color: var(--accent); transition: color 0.3s ease; }
+  .score-sep { color: var(--rule); font-size: 26px; }
+  .score-total { color: var(--ink-3); font-size: 22px; }
+
+  /* ---- tally ---- */
+  .tally {
+    display: flex;
+    gap: 4px;
+    margin: 16px 0 0;
+  }
+  .tick {
+    flex: 1;
+    height: 5px;
+    border-radius: 3px;
+    background: var(--rule-soft);
+    transition: background 0.3s ease, transform 0.3s cubic-bezier(0.34, 1.5, 0.64, 1);
+  }
+  .tick.on {
+    background: var(--accent);
+    transform: scaleY(1.5);
+  }
+
+  /* Newspaper-style double rule under the masthead. */
+  .masthead-rule {
+    margin: 18px 0 0;
+    border-top: 2px solid var(--ink);
+    border-bottom: 1px solid var(--rule);
+    height: 4px;
+  }
+
+  /* ---- stamp ---- */
+  .stamp-wrap {
+    display: flex;
+    justify-content: center;
+    max-height: 0;
+    opacity: 0;
+    overflow: hidden;
+    transition: max-height 0.35s ease, opacity 0.3s ease, margin 0.35s ease;
+  }
+  .stamp-wrap.show {
+    max-height: 120px;
+    opacity: 1;
+    margin: 26px 0 -4px;
+  }
+  .stamp {
+    color: var(--accent);
+    border: 2px solid var(--accent);
+    border-radius: 8px;
+    padding: 11px 20px 10px;
+    font-size: 13px;
+    letter-spacing: 0.2em;
+    font-weight: 700;
+    text-transform: uppercase;
+    box-shadow: 0 0 0 2px var(--stamp-ring), 0 0 0 3.5px var(--accent);
+    transform: rotate(-3deg) scale(0.7);
+    opacity: 0;
+    transition: transform 0.45s cubic-bezier(0.3, 1.6, 0.5, 1), opacity 0.3s ease;
+  }
+  .stamp-wrap.show .stamp {
+    transform: rotate(-3deg) scale(1);
+    opacity: 1;
+  }
+  .stamp small {
+    display: block;
+    font-size: 9.5px;
+    letter-spacing: 0.14em;
+    font-weight: 600;
+    color: var(--accent-2);
+    margin-top: 4px;
+    opacity: 0.85;
+  }
+
+  /* ---- sections ---- */
+  .group { margin-top: 30px; }
+  .group-head {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 4px;
+  }
+  .group-title { color: var(--clay); flex: none; }
+  .group-head .line {
+    flex: 1;
+    height: 1px;
+    background: var(--rule);
+  }
+  .group-count {
+    flex: none;
+    color: var(--ink-3);
+    font-size: 10.5px;
+    font-variant-numeric: tabular-nums;
+    letter-spacing: 0.06em;
     transition: color 0.3s ease;
   }
-  .ring.complete .ring-label { color: var(--accent); }
+  .group.complete .group-count { color: var(--accent); }
 
-  /* ---- banner ---- */
-  .done-banner {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    gap: 8px;
-    font-size: 15px;
-    font-weight: 550;
-    letter-spacing: -0.008em;
-    color: var(--accent);
-    background: var(--accent-bg);
-    border-radius: 16px;
-    padding: 14px;
-    margin-bottom: 20px;
-    opacity: 0;
-    transform: translateY(-6px) scale(0.97);
-    max-height: 0;
-    padding-top: 0;
-    padding-bottom: 0;
-    margin-bottom: 0;
-    overflow: hidden;
-    transition: opacity 0.3s ease, transform 0.3s cubic-bezier(0.34, 1.4, 0.64, 1),
-                max-height 0.3s ease, padding 0.3s ease, margin 0.3s ease;
-  }
-  .done-banner.show {
-    opacity: 1;
-    transform: translateY(0) scale(1);
-    max-height: 60px;
-    padding: 14px;
-    margin-bottom: 20px;
-  }
-  .done-banner svg { width: 17px; height: 17px; flex: none; }
-
-  /* ---- groups ---- */
-  .group + .group { margin-top: 24px; }
-  .group-title {
-    font-size: 11px;
-    font-weight: 650;
-    letter-spacing: 0.09em;
-    text-transform: uppercase;
-    color: var(--text-faint);
-    margin: 0 0 10px 4px;
-  }
-  .list {
-    display: flex;
-    flex-direction: column;
-    gap: 8px;
-  }
-
-  /* ---- item ---- */
+  /* ---- rows ---- */
   .item {
+    position: relative;
     display: flex;
     align-items: center;
-    gap: 14px;
-    background: var(--card);
-    border: 1px solid var(--border);
-    border-radius: 16px;
-    padding: 15px 16px;
+    gap: 15px;
+    padding: 15px 12px;
+    margin: 0 -12px;
+    border-radius: 12px;
+    border-bottom: 1px solid var(--rule-soft);
     cursor: pointer;
     user-select: none;
-    box-shadow: var(--shadow);
-    transition: background 0.22s ease, border-color 0.22s ease,
-                transform 0.12s cubic-bezier(0.34, 1.3, 0.64, 1), box-shadow 0.22s ease;
-    animation: rise 0.42s cubic-bezier(0.22, 0.8, 0.3, 1) backwards;
+    background: transparent;
+    transition: background 0.28s ease, transform 0.12s cubic-bezier(0.34, 1.3, 0.64, 1);
+    animation: rise 0.5s cubic-bezier(0.22, 0.85, 0.3, 1) backwards;
   }
   @keyframes rise {
-    from { opacity: 0; transform: translateY(10px); }
+    from { opacity: 0; transform: translateY(9px); }
     to   { opacity: 1; transform: translateY(0); }
   }
-  .item:active { transform: scale(0.975); }
+  .item:last-child { border-bottom: none; }
+  .item:active { transform: scale(0.985); }
   .item:focus-visible {
     outline: 2px solid var(--accent);
-    outline-offset: 2px;
+    outline-offset: 1px;
   }
-  .item.done {
-    background: var(--done-bg);
-    border-color: var(--done-border);
-    box-shadow: var(--shadow-done);
-  }
+  .item.done { background: var(--wash); }
 
-  .checkbox {
+  /* The index numeral doubles as the checkbox: tap it and it becomes the tick. */
+  .num {
     flex: none;
     position: relative;
-    width: 27px;
-    height: 27px;
+    width: 36px;
+    height: 36px;
     border-radius: 50%;
-    border: 2px solid var(--border-strong);
+    border: 1.5px solid var(--rule);
     display: flex;
     align-items: center;
     justify-content: center;
-    background: var(--card);
-    transition: background 0.22s ease, border-color 0.22s ease, transform 0.22s cubic-bezier(0.34, 1.5, 0.64, 1);
+    background: var(--paper);
+    transition: background 0.26s ease, border-color 0.26s ease,
+                transform 0.3s cubic-bezier(0.34, 1.55, 0.64, 1);
   }
-  .item.done .checkbox {
+  .item.done .num {
     background: var(--accent);
     border-color: var(--accent);
-    transform: scale(1.06);
+    transform: rotate(-8deg) scale(1.05);
   }
-  .checkbox svg {
-    width: 15px;
-    height: 15px;
-    stroke: var(--card);
-    stroke-width: 3.4;
+  .num-text {
+    font-size: 15px;
+    color: var(--ink-2);
+    font-variant-numeric: tabular-nums;
+    transition: opacity 0.18s ease;
+  }
+  .item.done .num-text { opacity: 0; }
+  .num svg {
+    position: absolute;
+    width: 17px;
+    height: 17px;
+    stroke: var(--paper);
+    stroke-width: 3.2;
     fill: none;
     stroke-linecap: round;
     stroke-linejoin: round;
   }
-  .checkbox polyline {
+  .num polyline {
     stroke-dasharray: 1;
     stroke-dashoffset: 1;
-    transition: stroke-dashoffset 0.28s cubic-bezier(0.65, 0, 0.35, 1) 0.05s;
+    transition: stroke-dashoffset 0.3s cubic-bezier(0.65, 0, 0.35, 1) 0.06s;
   }
-  .item.done .checkbox polyline { stroke-dashoffset: 0; }
+  .item.done .num polyline { stroke-dashoffset: 0; }
 
   .item-text { flex: 1; min-width: 0; }
   .item-name {
-    font-size: 16px;
+    font-size: 16.5px;
     font-weight: 550;
-    line-height: 1.3;
-    letter-spacing: -0.011em;
-    transition: color 0.22s ease;
+    line-height: 1.25;
+    letter-spacing: -0.012em;
+    transition: color 0.26s ease;
   }
   .item-name span {
     background-image: linear-gradient(currentColor, currentColor);
     background-repeat: no-repeat;
     background-position: 0 62%;
     background-size: 0% 1.5px;
-    transition: background-size 0.32s cubic-bezier(0.65, 0, 0.35, 1);
+    transition: background-size 0.34s cubic-bezier(0.65, 0, 0.35, 1);
   }
-  .item.done .item-name { color: var(--text-secondary); }
+  .item.done .item-name { color: var(--ink-2); }
   .item.done .item-name span { background-size: 100% 1.5px; }
   .item-meta {
-    font-size: 13px;
-    color: var(--text-faint);
-    margin-top: 3px;
+    margin-top: 5px;
+    color: var(--ink-3);
     font-variant-numeric: tabular-nums;
-    letter-spacing: -0.004em;
+    transition: color 0.26s ease;
   }
+  .item.done .item-meta { color: var(--accent-2); }
 
   /* ---- footer ---- */
   .footer {
@@ -273,8 +311,8 @@
     left: 0;
     right: 0;
     bottom: 0;
-    padding: 20px 16px calc(18px + env(safe-area-inset-bottom));
-    background: linear-gradient(to top, var(--bg) 55%, transparent);
+    padding: 26px 20px calc(20px + env(safe-area-inset-bottom));
+    background: linear-gradient(to top, var(--paper) 58%, transparent);
     display: flex;
     justify-content: center;
     pointer-events: none;
@@ -282,24 +320,16 @@
   .reset-btn {
     pointer-events: auto;
     font-family: inherit;
-    background: var(--card);
-    border: 1px solid var(--border);
-    color: var(--text-secondary);
-    font-size: 14px;
-    font-weight: 550;
-    letter-spacing: -0.006em;
-    padding: 11px 24px;
-    border-radius: 22px;
-    box-shadow: var(--shadow);
+    background: var(--paper-2);
+    border: 1px solid var(--rule);
+    color: var(--ink-2);
+    padding: 12px 24px;
+    border-radius: 24px;
     cursor: pointer;
-    transition: transform 0.12s ease, opacity 0.25s ease, color 0.25s ease;
+    transition: transform 0.12s ease, opacity 0.25s ease;
   }
   .reset-btn:active { transform: scale(0.96); }
-  .reset-btn:disabled {
-    opacity: 0.45;
-    cursor: default;
-    box-shadow: none;
-  }
+  .reset-btn:disabled { opacity: 0.4; cursor: default; }
 
   @media (prefers-reduced-motion: reduce) {
     *, *::before, *::after {
@@ -312,57 +342,54 @@
 </head>
 <body>
 
+<div class="grain" aria-hidden="true"></div>
+
 <header>
-  <div class="title-block">
-    <h1>Today's workout</h1>
-    <div class="date" id="date"></div>
+  <div>
+    <h1 class="serif">Today&rsquo;s <em>workout</em></h1>
+    <div class="date caps" id="date"></div>
   </div>
-  <div class="ring" id="ring" role="progressbar" aria-valuemin="0" aria-valuemax="9" aria-valuenow="0" aria-label="Exercises completed">
-    <svg viewBox="0 0 48 48" aria-hidden="true">
-      <circle class="ring-track" cx="24" cy="24" r="20"></circle>
-      <circle class="ring-fill" id="ringFill" cx="24" cy="24" r="20"></circle>
-    </svg>
-    <div class="ring-label" id="progressText">0/9</div>
+  <div class="score serif" id="score" role="progressbar" aria-valuemin="0" aria-valuemax="9" aria-valuenow="0" aria-label="Exercises completed">
+    <span class="score-done" id="scoreDone">0</span><span class="score-sep">/</span><span class="score-total" id="scoreTotal">9</span>
   </div>
 </header>
 
-<div class="done-banner" id="doneBanner" aria-live="polite">
-  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-    <polyline points="20 6 9 17 4 12"></polyline>
-  </svg>
-  All done. Nice work.
+<div class="tally" id="tally" aria-hidden="true"></div>
+<div class="masthead-rule"></div>
+
+<div class="stamp-wrap" id="stampWrap" aria-live="polite">
+  <div class="stamp">Complete<small>Nice work</small></div>
 </div>
 
 <main id="groups"></main>
 
 <div class="footer">
-  <button class="reset-btn" id="resetBtn">Reset checklist</button>
+  <button class="reset-btn caps" id="resetBtn">Reset checklist</button>
 </div>
 
 <script>
   var groups = [
     { title: 'Legs & glutes', items: [
-      { id: 'goblet-squat', name: 'Goblet squat', meta: '2 sets x 8-12' },
-      { id: 'reverse-lunges', name: 'Reverse lunges', meta: '2 sets x 8 each leg' },
-      { id: 'glute-bridge', name: 'Feet-elevated glute bridge', meta: '2 sets x 10-12' }
+      { id: 'goblet-squat', name: 'Goblet squat', meta: '2 sets × 8–12' },
+      { id: 'reverse-lunges', name: 'Reverse lunges', meta: '2 sets × 8 each leg' },
+      { id: 'glute-bridge', name: 'Feet-elevated glute bridge', meta: '2 sets × 10–12' }
     ]},
     { title: 'Arms & carry', items: [
-      { id: 'bicep-curls', name: 'Bicep curls', meta: '2 sets x 10-12' },
-      { id: 'suitcase-carry', name: 'Suitcase carry', meta: '1 set each side x 30 sec' }
+      { id: 'bicep-curls', name: 'Bicep curls', meta: '2 sets × 10–12' },
+      { id: 'suitcase-carry', name: 'Suitcase carry', meta: '1 set each side × 30 sec' }
     ]},
     { title: 'Core', items: [
-      { id: 'front-plank', name: 'Front plank', meta: '2 sets x 20-40 sec' },
-      { id: 'side-plank', name: 'Side plank', meta: '1 set each side x 15-30 sec' }
+      { id: 'front-plank', name: 'Front plank', meta: '2 sets × 20–40 sec' },
+      { id: 'side-plank', name: 'Side plank', meta: '1 set each side × 15–30 sec' }
     ]},
     { title: 'Drive & hips', items: [
-      { id: 'knee-drives', name: 'Knee drives', meta: '2 sets x 8 each leg' },
-      { id: 'abductions', name: 'Abductions', meta: '2 sets x 8 each leg' }
+      { id: 'knee-drives', name: 'Knee drives', meta: '2 sets × 8 each leg' },
+      { id: 'abductions', name: 'Abductions', meta: '2 sets × 8 each leg' }
     ]}
   ];
 
   var exercises = groups.reduce(function(all, g) { return all.concat(g.items); }, []);
   var TOTAL = exercises.length;
-  var CIRCUMFERENCE = 2 * Math.PI * 20;
   var STORAGE_KEY = 'workout-checklist-state';
 
   function loadState() {
@@ -383,31 +410,43 @@
   var state = loadState();
 
   var groupsEl = document.getElementById('groups');
-  var progressText = document.getElementById('progressText');
-  var ringEl = document.getElementById('ring');
-  var ringFill = document.getElementById('ringFill');
-  var doneBanner = document.getElementById('doneBanner');
+  var tallyEl = document.getElementById('tally');
+  var scoreEl = document.getElementById('score');
+  var scoreDone = document.getElementById('scoreDone');
+  var stampWrap = document.getElementById('stampWrap');
   var resetBtn = document.getElementById('resetBtn');
   var nodes = {};
+  var groupNodes = [];
+  var ticks = [];
 
   document.getElementById('date').textContent =
     new Date().toLocaleDateString(undefined, { weekday: 'long', day: 'numeric', month: 'long' });
+  document.getElementById('scoreTotal').textContent = TOTAL;
+  scoreEl.setAttribute('aria-valuemax', TOTAL);
 
-  ringEl.setAttribute('aria-valuemax', TOTAL);
-  ringFill.setAttribute('stroke-dasharray', CIRCUMFERENCE);
-  ringFill.style.strokeDashoffset = CIRCUMFERENCE;
+  for (var t = 0; t < TOTAL; t++) {
+    var tick = document.createElement('div');
+    tick.className = 'tick';
+    tallyEl.appendChild(tick);
+    ticks.push(tick);
+  }
 
   function buildItem(ex, index) {
     var item = document.createElement('div');
     item.className = 'item';
     item.setAttribute('role', 'checkbox');
     item.setAttribute('tabindex', '0');
-    item.style.animationDelay = (index * 35) + 'ms';
+    item.style.animationDelay = (index * 38) + 'ms';
 
-    var checkbox = document.createElement('div');
-    checkbox.className = 'checkbox';
-    checkbox.innerHTML = '<svg viewBox="0 0 24 24" aria-hidden="true">' +
-      '<polyline points="20 6 9 17 4 12" pathLength="1"></polyline></svg>';
+    var num = document.createElement('div');
+    num.className = 'num';
+    var numText = document.createElement('span');
+    numText.className = 'num-text serif';
+    numText.textContent = index + 1 < 10 ? '0' + (index + 1) : String(index + 1);
+    num.appendChild(numText);
+    num.insertAdjacentHTML('beforeend',
+      '<svg viewBox="0 0 24 24" aria-hidden="true">' +
+      '<polyline points="20 6 9 17 4 12" pathLength="1"></polyline></svg>');
 
     var textWrap = document.createElement('div');
     textWrap.className = 'item-text';
@@ -417,12 +456,12 @@
     nameSpan.textContent = ex.name;
     nameEl.appendChild(nameSpan);
     var metaEl = document.createElement('div');
-    metaEl.className = 'item-meta';
+    metaEl.className = 'item-meta caps';
     metaEl.textContent = ex.meta;
     textWrap.appendChild(nameEl);
     textWrap.appendChild(metaEl);
 
-    item.appendChild(checkbox);
+    item.appendChild(num);
     item.appendChild(textWrap);
 
     function toggle() {
@@ -453,13 +492,18 @@
 
   function syncProgress() {
     var doneCount = exercises.filter(function(ex) { return state[ex.id]; }).length;
-    var fraction = doneCount / TOTAL;
-    progressText.textContent = doneCount + '/' + TOTAL;
-    ringFill.style.strokeDashoffset = CIRCUMFERENCE * (1 - fraction);
-    ringFill.style.strokeLinecap = doneCount ? 'round' : 'butt';
-    ringEl.setAttribute('aria-valuenow', doneCount);
-    ringEl.classList.toggle('complete', doneCount === TOTAL);
-    doneBanner.classList.toggle('show', doneCount === TOTAL);
+
+    scoreDone.textContent = doneCount;
+    scoreEl.setAttribute('aria-valuenow', doneCount);
+    ticks.forEach(function(tick, i) { tick.classList.toggle('on', i < doneCount); });
+
+    groupNodes.forEach(function(g) {
+      var done = g.group.items.filter(function(ex) { return state[ex.id]; }).length;
+      g.count.textContent = done + '/' + g.group.items.length;
+      g.section.classList.toggle('complete', done === g.group.items.length);
+    });
+
+    stampWrap.classList.toggle('show', doneCount === TOTAL);
     resetBtn.disabled = doneCount === 0;
   }
 
@@ -468,19 +512,26 @@
     var section = document.createElement('section');
     section.className = 'group';
 
+    var head = document.createElement('div');
+    head.className = 'group-head';
     var heading = document.createElement('h2');
-    heading.className = 'group-title';
+    heading.className = 'group-title caps';
     heading.textContent = group.title;
-    section.appendChild(heading);
+    var line = document.createElement('div');
+    line.className = 'line';
+    var count = document.createElement('div');
+    count.className = 'group-count';
+    head.appendChild(heading);
+    head.appendChild(line);
+    head.appendChild(count);
+    section.appendChild(head);
 
-    var list = document.createElement('div');
-    list.className = 'list';
     group.items.forEach(function(ex) {
-      list.appendChild(buildItem(ex, index++));
+      section.appendChild(buildItem(ex, index++));
     });
-    section.appendChild(list);
 
     groupsEl.appendChild(section);
+    groupNodes.push({ group: group, section: section, count: count });
   });
 
   exercises.forEach(syncItem);
