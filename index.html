@@ -6,19 +6,48 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="default">
 <meta name="apple-mobile-web-app-title" content="Workout">
-<meta name="theme-color" content="#f7f6f2">
+<meta name="color-scheme" content="light dark">
+<meta name="theme-color" content="#f7f6f2" media="(prefers-color-scheme: light)">
+<meta name="theme-color" content="#16170f" media="(prefers-color-scheme: dark)">
 <title>Workout Checklist</title>
 <style>
   :root {
     --bg: #f7f6f2;
+    --bg-soft: #efeee7;
     --card: #ffffff;
     --border: #e3e1d8;
+    --border-strong: #d4d1c4;
     --text: #2c2c2a;
     --text-secondary: #6b6a63;
+    --text-faint: #96958c;
     --accent: #3b6d11;
+    --accent-soft: #5c8f2c;
     --accent-bg: #eaf3de;
-    --done-bg: #f1f5ea;
+    --done-bg: #f2f6ec;
+    --done-border: #c9e0a6;
+    --shadow: 0 1px 2px rgba(44, 44, 42, 0.04), 0 4px 12px rgba(44, 44, 42, 0.05);
+    --shadow-done: 0 1px 2px rgba(59, 109, 17, 0.05);
   }
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --bg: #16170f;
+      --bg-soft: #1c1e15;
+      --card: #21231a;
+      --border: #33362a;
+      --border-strong: #434737;
+      --text: #eeecdf;
+      --text-secondary: #9d9c8e;
+      --text-faint: #7a7a6e;
+      --accent: #9ed35f;
+      --accent-soft: #85bb47;
+      --accent-bg: #242e18;
+      --done-bg: #1d2416;
+      --done-border: #3c5426;
+      --shadow: 0 1px 2px rgba(0, 0, 0, 0.3), 0 4px 12px rgba(0, 0, 0, 0.22);
+      --shadow-done: 0 1px 2px rgba(0, 0, 0, 0.25);
+    }
+  }
+
   * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
   html, body {
     margin: 0;
@@ -27,165 +56,313 @@
     color: var(--text);
     font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
     -webkit-font-smoothing: antialiased;
+    text-rendering: optimizeLegibility;
   }
   body {
     min-height: 100vh;
-    padding: max(20px, env(safe-area-inset-top)) 16px calc(90px + env(safe-area-inset-bottom));
+    padding: max(24px, env(safe-area-inset-top)) 16px calc(96px + env(safe-area-inset-bottom));
+    max-width: 560px;
+    margin: 0 auto;
   }
+
+  /* ---- header ---- */
   header {
     display: flex;
     justify-content: space-between;
-    align-items: baseline;
-    margin-bottom: 4px;
+    align-items: center;
+    gap: 16px;
+    margin-bottom: 26px;
   }
+  .title-block { min-width: 0; }
   h1 {
-    font-size: 20px;
-    font-weight: 600;
+    font-size: 26px;
+    font-weight: 650;
+    letter-spacing: -0.021em;
     margin: 0;
+    line-height: 1.15;
   }
-  .progress-text {
+  .date {
     font-size: 14px;
-    color: var(--text-secondary);
+    color: var(--text-faint);
+    margin-top: 5px;
+    letter-spacing: -0.003em;
   }
-  .progress-bar {
-    height: 6px;
-    background: var(--border);
-    border-radius: 3px;
-    overflow: hidden;
-    margin: 12px 0 20px;
+
+  .ring {
+    flex: none;
+    position: relative;
+    width: 56px;
+    height: 56px;
   }
-  .progress-fill {
+  .ring svg {
+    width: 100%;
     height: 100%;
-    background: var(--accent);
-    border-radius: 3px;
-    transition: width 0.25s ease;
-    width: 0%;
+    transform: rotate(-90deg);
+  }
+  .ring-track {
+    fill: none;
+    stroke: var(--border);
+    stroke-width: 4;
+  }
+  .ring-fill {
+    fill: none;
+    stroke: var(--accent);
+    stroke-width: 4;
+    stroke-linecap: round;
+    stroke-dasharray: 125.664;
+    stroke-dashoffset: 125.664;
+    transition: stroke-dashoffset 0.45s cubic-bezier(0.4, 0, 0.2, 1);
+  }
+  .ring-label {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 13px;
+    font-weight: 600;
+    font-variant-numeric: tabular-nums;
+    letter-spacing: -0.02em;
+    color: var(--text-secondary);
+    transition: color 0.3s ease;
+  }
+  .ring.complete .ring-label { color: var(--accent); }
+
+  /* ---- banner ---- */
+  .done-banner {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    font-size: 15px;
+    font-weight: 550;
+    letter-spacing: -0.008em;
+    color: var(--accent);
+    background: var(--accent-bg);
+    border-radius: 16px;
+    padding: 14px;
+    margin-bottom: 20px;
+    opacity: 0;
+    transform: translateY(-6px) scale(0.97);
+    max-height: 0;
+    padding-top: 0;
+    padding-bottom: 0;
+    margin-bottom: 0;
+    overflow: hidden;
+    transition: opacity 0.3s ease, transform 0.3s cubic-bezier(0.34, 1.4, 0.64, 1),
+                max-height 0.3s ease, padding 0.3s ease, margin 0.3s ease;
+  }
+  .done-banner.show {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+    max-height: 60px;
+    padding: 14px;
+    margin-bottom: 20px;
+  }
+  .done-banner svg { width: 17px; height: 17px; flex: none; }
+
+  /* ---- groups ---- */
+  .group + .group { margin-top: 24px; }
+  .group-title {
+    font-size: 11px;
+    font-weight: 650;
+    letter-spacing: 0.09em;
+    text-transform: uppercase;
+    color: var(--text-faint);
+    margin: 0 0 10px 4px;
   }
   .list {
     display: flex;
     flex-direction: column;
-    gap: 10px;
+    gap: 8px;
   }
+
+  /* ---- item ---- */
   .item {
     display: flex;
     align-items: center;
     gap: 14px;
     background: var(--card);
     border: 1px solid var(--border);
-    border-radius: 14px;
-    padding: 14px 16px;
+    border-radius: 16px;
+    padding: 15px 16px;
     cursor: pointer;
     user-select: none;
-    transition: background 0.15s ease, border-color 0.15s ease, transform 0.1s ease;
+    box-shadow: var(--shadow);
+    transition: background 0.22s ease, border-color 0.22s ease,
+                transform 0.12s cubic-bezier(0.34, 1.3, 0.64, 1), box-shadow 0.22s ease;
+    animation: rise 0.42s cubic-bezier(0.22, 0.8, 0.3, 1) backwards;
   }
-  .item:active {
-    transform: scale(0.98);
+  @keyframes rise {
+    from { opacity: 0; transform: translateY(10px); }
+    to   { opacity: 1; transform: translateY(0); }
+  }
+  .item:active { transform: scale(0.975); }
+  .item:focus-visible {
+    outline: 2px solid var(--accent);
+    outline-offset: 2px;
   }
   .item.done {
     background: var(--done-bg);
-    border-color: #c0dd97;
+    border-color: var(--done-border);
+    box-shadow: var(--shadow-done);
   }
+
   .checkbox {
     flex: none;
-    width: 26px;
-    height: 26px;
+    position: relative;
+    width: 27px;
+    height: 27px;
     border-radius: 50%;
-    border: 2px solid var(--border);
+    border: 2px solid var(--border-strong);
     display: flex;
     align-items: center;
     justify-content: center;
     background: var(--card);
-    transition: background 0.15s ease, border-color 0.15s ease;
+    transition: background 0.22s ease, border-color 0.22s ease, transform 0.22s cubic-bezier(0.34, 1.5, 0.64, 1);
   }
   .item.done .checkbox {
     background: var(--accent);
     border-color: var(--accent);
+    transform: scale(1.06);
   }
   .checkbox svg {
     width: 15px;
     height: 15px;
-    opacity: 0;
-    transition: opacity 0.15s ease;
+    stroke: var(--card);
+    stroke-width: 3.4;
+    fill: none;
+    stroke-linecap: round;
+    stroke-linejoin: round;
   }
-  .item.done .checkbox svg { opacity: 1; }
+  .checkbox polyline {
+    stroke-dasharray: 1;
+    stroke-dashoffset: 1;
+    transition: stroke-dashoffset 0.28s cubic-bezier(0.65, 0, 0.35, 1) 0.05s;
+  }
+  .item.done .checkbox polyline { stroke-dashoffset: 0; }
+
   .item-text { flex: 1; min-width: 0; }
   .item-name {
     font-size: 16px;
-    font-weight: 500;
+    font-weight: 550;
     line-height: 1.3;
+    letter-spacing: -0.011em;
+    transition: color 0.22s ease;
   }
-  .item.done .item-name {
-    text-decoration: line-through;
-    color: var(--text-secondary);
+  .item-name span {
+    background-image: linear-gradient(currentColor, currentColor);
+    background-repeat: no-repeat;
+    background-position: 0 62%;
+    background-size: 0% 1.5px;
+    transition: background-size 0.32s cubic-bezier(0.65, 0, 0.35, 1);
   }
+  .item.done .item-name { color: var(--text-secondary); }
+  .item.done .item-name span { background-size: 100% 1.5px; }
   .item-meta {
     font-size: 13px;
-    color: var(--text-secondary);
-    margin-top: 2px;
+    color: var(--text-faint);
+    margin-top: 3px;
+    font-variant-numeric: tabular-nums;
+    letter-spacing: -0.004em;
   }
+
+  /* ---- footer ---- */
   .footer {
     position: fixed;
     left: 0;
     right: 0;
     bottom: 0;
-    padding: 12px 16px calc(16px + env(safe-area-inset-bottom));
-    background: linear-gradient(to top, var(--bg) 60%, transparent);
+    padding: 20px 16px calc(18px + env(safe-area-inset-bottom));
+    background: linear-gradient(to top, var(--bg) 55%, transparent);
     display: flex;
     justify-content: center;
+    pointer-events: none;
   }
   .reset-btn {
+    pointer-events: auto;
+    font-family: inherit;
     background: var(--card);
     border: 1px solid var(--border);
     color: var(--text-secondary);
     font-size: 14px;
-    font-weight: 500;
-    padding: 10px 22px;
-    border-radius: 20px;
+    font-weight: 550;
+    letter-spacing: -0.006em;
+    padding: 11px 24px;
+    border-radius: 22px;
+    box-shadow: var(--shadow);
+    cursor: pointer;
+    transition: transform 0.12s ease, opacity 0.25s ease, color 0.25s ease;
   }
-  .reset-btn:active { transform: scale(0.97); }
-  .done-banner {
-    text-align: center;
-    font-size: 15px;
-    font-weight: 500;
-    color: var(--accent);
-    background: var(--accent-bg);
-    border-radius: 14px;
-    padding: 12px;
-    margin-bottom: 14px;
-    display: none;
+  .reset-btn:active { transform: scale(0.96); }
+  .reset-btn:disabled {
+    opacity: 0.45;
+    cursor: default;
+    box-shadow: none;
   }
-  .done-banner.show { display: block; }
+
+  @media (prefers-reduced-motion: reduce) {
+    *, *::before, *::after {
+      animation-duration: 0.01ms !important;
+      animation-delay: 0ms !important;
+      transition-duration: 0.01ms !important;
+    }
+  }
 </style>
 </head>
 <body>
 
 <header>
-  <h1>Today's workout</h1>
-  <span class="progress-text" id="progressText">0/9</span>
+  <div class="title-block">
+    <h1>Today's workout</h1>
+    <div class="date" id="date"></div>
+  </div>
+  <div class="ring" id="ring" role="progressbar" aria-valuemin="0" aria-valuemax="9" aria-valuenow="0" aria-label="Exercises completed">
+    <svg viewBox="0 0 48 48" aria-hidden="true">
+      <circle class="ring-track" cx="24" cy="24" r="20"></circle>
+      <circle class="ring-fill" id="ringFill" cx="24" cy="24" r="20"></circle>
+    </svg>
+    <div class="ring-label" id="progressText">0/9</div>
+  </div>
 </header>
-<div class="progress-bar"><div class="progress-fill" id="progressFill"></div></div>
 
-<div class="done-banner" id="doneBanner">All done. Nice work.</div>
+<div class="done-banner" id="doneBanner" aria-live="polite">
+  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+    <polyline points="20 6 9 17 4 12"></polyline>
+  </svg>
+  All done. Nice work.
+</div>
 
-<div class="list" id="list"></div>
+<main id="groups"></main>
 
 <div class="footer">
   <button class="reset-btn" id="resetBtn">Reset checklist</button>
 </div>
 
 <script>
-  var exercises = [
-    { id: 'goblet-squat', name: 'Goblet squat', meta: '2 sets x 8-12' },
-    { id: 'reverse-lunges', name: 'Reverse lunges', meta: '2 sets x 8 each leg' },
-    { id: 'glute-bridge', name: 'Feet-elevated glute bridge', meta: '2 sets x 10-12' },
-    { id: 'bicep-curls', name: 'Bicep curls', meta: '2 sets x 10-12' },
-    { id: 'suitcase-carry', name: 'Suitcase carry', meta: '1 set each side x 30 sec' },
-    { id: 'front-plank', name: 'Front plank', meta: '2 sets x 20-40 sec' },
-    { id: 'side-plank', name: 'Side plank', meta: '1 set each side x 15-30 sec' },
-    { id: 'knee-drives', name: 'Knee drives', meta: '2 sets x 8 each leg' },
-    { id: 'abductions', name: 'Abductions', meta: '2 sets x 8 each leg' }
+  var groups = [
+    { title: 'Legs & glutes', items: [
+      { id: 'goblet-squat', name: 'Goblet squat', meta: '2 sets x 8-12' },
+      { id: 'reverse-lunges', name: 'Reverse lunges', meta: '2 sets x 8 each leg' },
+      { id: 'glute-bridge', name: 'Feet-elevated glute bridge', meta: '2 sets x 10-12' }
+    ]},
+    { title: 'Arms & carry', items: [
+      { id: 'bicep-curls', name: 'Bicep curls', meta: '2 sets x 10-12' },
+      { id: 'suitcase-carry', name: 'Suitcase carry', meta: '1 set each side x 30 sec' }
+    ]},
+    { title: 'Core', items: [
+      { id: 'front-plank', name: 'Front plank', meta: '2 sets x 20-40 sec' },
+      { id: 'side-plank', name: 'Side plank', meta: '1 set each side x 15-30 sec' }
+    ]},
+    { title: 'Drive & hips', items: [
+      { id: 'knee-drives', name: 'Knee drives', meta: '2 sets x 8 each leg' },
+      { id: 'abductions', name: 'Abductions', meta: '2 sets x 8 each leg' }
+    ]}
   ];
 
+  var exercises = groups.reduce(function(all, g) { return all.concat(g.items); }, []);
+  var TOTAL = exercises.length;
+  var CIRCUMFERENCE = 2 * Math.PI * 20;
   var STORAGE_KEY = 'workout-checklist-state';
 
   function loadState() {
@@ -205,70 +382,116 @@
 
   var state = loadState();
 
-  var listEl = document.getElementById('list');
+  var groupsEl = document.getElementById('groups');
   var progressText = document.getElementById('progressText');
-  var progressFill = document.getElementById('progressFill');
+  var ringEl = document.getElementById('ring');
+  var ringFill = document.getElementById('ringFill');
   var doneBanner = document.getElementById('doneBanner');
+  var resetBtn = document.getElementById('resetBtn');
+  var nodes = {};
 
-  function render() {
-    listEl.innerHTML = '';
-    var doneCount = 0;
-    exercises.forEach(function(ex) {
-      var isDone = !!state[ex.id];
-      if (isDone) doneCount++;
+  document.getElementById('date').textContent =
+    new Date().toLocaleDateString(undefined, { weekday: 'long', day: 'numeric', month: 'long' });
 
-      var item = document.createElement('div');
-      item.className = 'item' + (isDone ? ' done' : '');
-      item.setAttribute('role', 'checkbox');
-      item.setAttribute('aria-checked', isDone ? 'true' : 'false');
-      item.setAttribute('tabindex', '0');
+  ringEl.setAttribute('aria-valuemax', TOTAL);
+  ringFill.setAttribute('stroke-dasharray', CIRCUMFERENCE);
+  ringFill.style.strokeDashoffset = CIRCUMFERENCE;
 
-      var checkbox = document.createElement('div');
-      checkbox.className = 'checkbox';
-      checkbox.innerHTML = '<svg viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg>';
+  function buildItem(ex, index) {
+    var item = document.createElement('div');
+    item.className = 'item';
+    item.setAttribute('role', 'checkbox');
+    item.setAttribute('tabindex', '0');
+    item.style.animationDelay = (index * 35) + 'ms';
 
-      var textWrap = document.createElement('div');
-      textWrap.className = 'item-text';
-      var nameEl = document.createElement('div');
-      nameEl.className = 'item-name';
-      nameEl.textContent = ex.name;
-      var metaEl = document.createElement('div');
-      metaEl.className = 'item-meta';
-      metaEl.textContent = ex.meta;
-      textWrap.appendChild(nameEl);
-      textWrap.appendChild(metaEl);
+    var checkbox = document.createElement('div');
+    checkbox.className = 'checkbox';
+    checkbox.innerHTML = '<svg viewBox="0 0 24 24" aria-hidden="true">' +
+      '<polyline points="20 6 9 17 4 12" pathLength="1"></polyline></svg>';
 
-      item.appendChild(checkbox);
-      item.appendChild(textWrap);
+    var textWrap = document.createElement('div');
+    textWrap.className = 'item-text';
+    var nameEl = document.createElement('div');
+    nameEl.className = 'item-name';
+    var nameSpan = document.createElement('span');
+    nameSpan.textContent = ex.name;
+    nameEl.appendChild(nameSpan);
+    var metaEl = document.createElement('div');
+    metaEl.className = 'item-meta';
+    metaEl.textContent = ex.meta;
+    textWrap.appendChild(nameEl);
+    textWrap.appendChild(metaEl);
 
-      function toggle() {
-        state[ex.id] = !state[ex.id];
-        saveState(state);
-        render();
+    item.appendChild(checkbox);
+    item.appendChild(textWrap);
+
+    function toggle() {
+      state[ex.id] = !state[ex.id];
+      saveState(state);
+      syncItem(ex);
+      syncProgress();
+    }
+    item.addEventListener('click', toggle);
+    item.addEventListener('keydown', function(e) {
+      if (e.key === 'Enter' || e.key === ' ') {
+        e.preventDefault();
+        toggle();
       }
-      item.addEventListener('click', toggle);
-      item.addEventListener('keydown', function(e) {
-        if (e.key === 'Enter' || e.key === ' ') {
-          e.preventDefault();
-          toggle();
-        }
-      });
-
-      listEl.appendChild(item);
     });
 
-    progressText.textContent = doneCount + '/' + exercises.length;
-    progressFill.style.width = (doneCount / exercises.length * 100) + '%';
-    doneBanner.classList.toggle('show', doneCount === exercises.length);
+    nodes[ex.id] = item;
+    return item;
   }
 
-  document.getElementById('resetBtn').addEventListener('click', function() {
-    state = {};
-    saveState(state);
-    render();
+  function syncItem(ex) {
+    var isDone = !!state[ex.id];
+    var item = nodes[ex.id];
+    item.classList.toggle('done', isDone);
+    item.setAttribute('aria-checked', isDone ? 'true' : 'false');
+    item.setAttribute('aria-label', ex.name + ', ' + ex.meta);
+  }
+
+  function syncProgress() {
+    var doneCount = exercises.filter(function(ex) { return state[ex.id]; }).length;
+    var fraction = doneCount / TOTAL;
+    progressText.textContent = doneCount + '/' + TOTAL;
+    ringFill.style.strokeDashoffset = CIRCUMFERENCE * (1 - fraction);
+    ringFill.style.strokeLinecap = doneCount ? 'round' : 'butt';
+    ringEl.setAttribute('aria-valuenow', doneCount);
+    ringEl.classList.toggle('complete', doneCount === TOTAL);
+    doneBanner.classList.toggle('show', doneCount === TOTAL);
+    resetBtn.disabled = doneCount === 0;
+  }
+
+  var index = 0;
+  groups.forEach(function(group) {
+    var section = document.createElement('section');
+    section.className = 'group';
+
+    var heading = document.createElement('h2');
+    heading.className = 'group-title';
+    heading.textContent = group.title;
+    section.appendChild(heading);
+
+    var list = document.createElement('div');
+    list.className = 'list';
+    group.items.forEach(function(ex) {
+      list.appendChild(buildItem(ex, index++));
+    });
+    section.appendChild(list);
+
+    groupsEl.appendChild(section);
   });
 
-  render();
+  exercises.forEach(syncItem);
+  syncProgress();
+
+  resetBtn.addEventListener('click', function() {
+    state = {};
+    saveState(state);
+    exercises.forEach(syncItem);
+    syncProgress();
+  });
 </script>
 
 </body>
