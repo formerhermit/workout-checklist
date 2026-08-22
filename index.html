@@ -1,0 +1,275 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, user-scalable=no">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<meta name="apple-mobile-web-app-title" content="Workout">
+<meta name="theme-color" content="#f7f6f2">
+<title>Workout Checklist</title>
+<style>
+  :root {
+    --bg: #f7f6f2;
+    --card: #ffffff;
+    --border: #e3e1d8;
+    --text: #2c2c2a;
+    --text-secondary: #6b6a63;
+    --accent: #3b6d11;
+    --accent-bg: #eaf3de;
+    --done-bg: #f1f5ea;
+  }
+  * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+  html, body {
+    margin: 0;
+    padding: 0;
+    background: var(--bg);
+    color: var(--text);
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+    -webkit-font-smoothing: antialiased;
+  }
+  body {
+    min-height: 100vh;
+    padding: max(20px, env(safe-area-inset-top)) 16px calc(90px + env(safe-area-inset-bottom));
+  }
+  header {
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+    margin-bottom: 4px;
+  }
+  h1 {
+    font-size: 20px;
+    font-weight: 600;
+    margin: 0;
+  }
+  .progress-text {
+    font-size: 14px;
+    color: var(--text-secondary);
+  }
+  .progress-bar {
+    height: 6px;
+    background: var(--border);
+    border-radius: 3px;
+    overflow: hidden;
+    margin: 12px 0 20px;
+  }
+  .progress-fill {
+    height: 100%;
+    background: var(--accent);
+    border-radius: 3px;
+    transition: width 0.25s ease;
+    width: 0%;
+  }
+  .list {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+  }
+  .item {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 14px;
+    padding: 14px 16px;
+    cursor: pointer;
+    user-select: none;
+    transition: background 0.15s ease, border-color 0.15s ease, transform 0.1s ease;
+  }
+  .item:active {
+    transform: scale(0.98);
+  }
+  .item.done {
+    background: var(--done-bg);
+    border-color: #c0dd97;
+  }
+  .checkbox {
+    flex: none;
+    width: 26px;
+    height: 26px;
+    border-radius: 50%;
+    border: 2px solid var(--border);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: var(--card);
+    transition: background 0.15s ease, border-color 0.15s ease;
+  }
+  .item.done .checkbox {
+    background: var(--accent);
+    border-color: var(--accent);
+  }
+  .checkbox svg {
+    width: 15px;
+    height: 15px;
+    opacity: 0;
+    transition: opacity 0.15s ease;
+  }
+  .item.done .checkbox svg { opacity: 1; }
+  .item-text { flex: 1; min-width: 0; }
+  .item-name {
+    font-size: 16px;
+    font-weight: 500;
+    line-height: 1.3;
+  }
+  .item.done .item-name {
+    text-decoration: line-through;
+    color: var(--text-secondary);
+  }
+  .item-meta {
+    font-size: 13px;
+    color: var(--text-secondary);
+    margin-top: 2px;
+  }
+  .footer {
+    position: fixed;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    padding: 12px 16px calc(16px + env(safe-area-inset-bottom));
+    background: linear-gradient(to top, var(--bg) 60%, transparent);
+    display: flex;
+    justify-content: center;
+  }
+  .reset-btn {
+    background: var(--card);
+    border: 1px solid var(--border);
+    color: var(--text-secondary);
+    font-size: 14px;
+    font-weight: 500;
+    padding: 10px 22px;
+    border-radius: 20px;
+  }
+  .reset-btn:active { transform: scale(0.97); }
+  .done-banner {
+    text-align: center;
+    font-size: 15px;
+    font-weight: 500;
+    color: var(--accent);
+    background: var(--accent-bg);
+    border-radius: 14px;
+    padding: 12px;
+    margin-bottom: 14px;
+    display: none;
+  }
+  .done-banner.show { display: block; }
+</style>
+</head>
+<body>
+
+<header>
+  <h1>Today's workout</h1>
+  <span class="progress-text" id="progressText">0/9</span>
+</header>
+<div class="progress-bar"><div class="progress-fill" id="progressFill"></div></div>
+
+<div class="done-banner" id="doneBanner">All done. Nice work.</div>
+
+<div class="list" id="list"></div>
+
+<div class="footer">
+  <button class="reset-btn" id="resetBtn">Reset checklist</button>
+</div>
+
+<script>
+  var exercises = [
+    { id: 'goblet-squat', name: 'Goblet squat', meta: '2 sets x 8-12' },
+    { id: 'reverse-lunges', name: 'Reverse lunges', meta: '2 sets x 8 each leg' },
+    { id: 'glute-bridge', name: 'Feet-elevated glute bridge', meta: '2 sets x 10-12' },
+    { id: 'bicep-curls', name: 'Bicep curls', meta: '2 sets x 10-12' },
+    { id: 'suitcase-carry', name: 'Suitcase carry', meta: '1 set each side x 30 sec' },
+    { id: 'front-plank', name: 'Front plank', meta: '2 sets x 20-40 sec' },
+    { id: 'side-plank', name: 'Side plank', meta: '1 set each side x 15-30 sec' },
+    { id: 'knee-drives', name: 'Knee drives', meta: '2 sets x 8 each leg' },
+    { id: 'abductions', name: 'Abductions', meta: '2 sets x 8 each leg' }
+  ];
+
+  var STORAGE_KEY = 'workout-checklist-state';
+
+  function loadState() {
+    try {
+      var raw = localStorage.getItem(STORAGE_KEY);
+      return raw ? JSON.parse(raw) : {};
+    } catch (e) {
+      return {};
+    }
+  }
+
+  function saveState(state) {
+    try {
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+    } catch (e) {}
+  }
+
+  var state = loadState();
+
+  var listEl = document.getElementById('list');
+  var progressText = document.getElementById('progressText');
+  var progressFill = document.getElementById('progressFill');
+  var doneBanner = document.getElementById('doneBanner');
+
+  function render() {
+    listEl.innerHTML = '';
+    var doneCount = 0;
+    exercises.forEach(function(ex) {
+      var isDone = !!state[ex.id];
+      if (isDone) doneCount++;
+
+      var item = document.createElement('div');
+      item.className = 'item' + (isDone ? ' done' : '');
+      item.setAttribute('role', 'checkbox');
+      item.setAttribute('aria-checked', isDone ? 'true' : 'false');
+      item.setAttribute('tabindex', '0');
+
+      var checkbox = document.createElement('div');
+      checkbox.className = 'checkbox';
+      checkbox.innerHTML = '<svg viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg>';
+
+      var textWrap = document.createElement('div');
+      textWrap.className = 'item-text';
+      var nameEl = document.createElement('div');
+      nameEl.className = 'item-name';
+      nameEl.textContent = ex.name;
+      var metaEl = document.createElement('div');
+      metaEl.className = 'item-meta';
+      metaEl.textContent = ex.meta;
+      textWrap.appendChild(nameEl);
+      textWrap.appendChild(metaEl);
+
+      item.appendChild(checkbox);
+      item.appendChild(textWrap);
+
+      function toggle() {
+        state[ex.id] = !state[ex.id];
+        saveState(state);
+        render();
+      }
+      item.addEventListener('click', toggle);
+      item.addEventListener('keydown', function(e) {
+        if (e.key === 'Enter' || e.key === ' ') {
+          e.preventDefault();
+          toggle();
+        }
+      });
+
+      listEl.appendChild(item);
+    });
+
+    progressText.textContent = doneCount + '/' + exercises.length;
+    progressFill.style.width = (doneCount / exercises.length * 100) + '%';
+    doneBanner.classList.toggle('show', doneCount === exercises.length);
+  }
+
+  document.getElementById('resetBtn').addEventListener('click', function() {
+    state = {};
+    saveState(state);
+    render();
+  });
+
+  render();
+</script>
+
+</body>
+</html>
