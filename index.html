@@ -112,7 +112,7 @@
     font-variant-numeric: tabular-nums;
     letter-spacing: -0.02em;
   }
-  .score-done { color: var(--accent); transition: color 0.3s ease; }
+  .score-done { color: var(--accent); }
   .score-sep { color: var(--rule); font-size: 26px; }
   .score-total { color: var(--ink-3); font-size: 22px; }
 
@@ -142,6 +142,55 @@
     height: 4px;
   }
 
+  /* ---- day switcher ---- */
+  .switch {
+    position: relative;
+    display: flex;
+    margin-top: 20px;
+    padding: 3px;
+    background: var(--paper-2);
+    border: 1px solid var(--rule);
+    border-radius: 26px;
+  }
+  .thumb {
+    position: absolute;
+    top: 3px;
+    left: 3px;
+    width: calc(50% - 3px);
+    height: calc(100% - 6px);
+    border-radius: 22px;
+    background: var(--ink);
+    transition: transform 0.38s cubic-bezier(0.36, 1.25, 0.5, 1);
+  }
+  .switch.b .thumb { transform: translateX(100%); }
+  .switch button {
+    position: relative;
+    z-index: 1;
+    flex: 1;
+    padding: 11px 6px 10px;
+    border: none;
+    background: none;
+    font-family: inherit;
+    color: var(--ink-2);
+    cursor: pointer;
+    border-radius: 22px;
+    transition: color 0.28s ease;
+  }
+  .switch button[aria-selected="true"] { color: var(--paper); }
+  .switch button:focus-visible {
+    outline: 2px solid var(--accent);
+    outline-offset: 2px;
+  }
+  .switch .day-done {
+    display: inline-block;
+    margin-left: 7px;
+    color: var(--accent);
+    opacity: 0;
+    transform: scale(0.5);
+    transition: opacity 0.25s ease, transform 0.3s cubic-bezier(0.34, 1.6, 0.64, 1);
+  }
+  .switch button.complete .day-done { opacity: 1; transform: scale(1); }
+
   /* ---- stamp ---- */
   .stamp-wrap {
     display: flex;
@@ -154,7 +203,7 @@
   .stamp-wrap.show {
     max-height: 120px;
     opacity: 1;
-    margin: 26px 0 -4px;
+    margin: 26px 0 -6px;
   }
   .stamp {
     color: var(--accent);
@@ -165,6 +214,7 @@
     letter-spacing: 0.2em;
     font-weight: 700;
     text-transform: uppercase;
+    text-align: center;
     box-shadow: 0 0 0 2px var(--stamp-ring), 0 0 0 3.5px var(--accent);
     transform: rotate(-3deg) scale(0.7);
     opacity: 0;
@@ -184,21 +234,22 @@
     opacity: 0.85;
   }
 
-  /* ---- sections ---- */
-  .group { margin-top: 30px; }
-  .group-head {
+  /* ---- day panel ---- */
+  .day { display: none; }
+  .day.active { display: block; }
+  .day-head {
     display: flex;
     align-items: center;
     gap: 12px;
-    margin-bottom: 4px;
+    margin: 30px 0 4px;
   }
-  .group-title { color: var(--clay); flex: none; }
-  .group-head .line {
+  .day-focus { color: var(--clay); flex: none; }
+  .day-head .line {
     flex: 1;
     height: 1px;
     background: var(--rule);
   }
-  .group-count {
+  .day-count {
     flex: none;
     color: var(--ink-3);
     font-size: 10.5px;
@@ -206,11 +257,10 @@
     letter-spacing: 0.06em;
     transition: color 0.3s ease;
   }
-  .group.complete .group-count { color: var(--accent); }
+  .day.complete .day-count { color: var(--accent); }
 
   /* ---- rows ---- */
   .item {
-    position: relative;
     display: flex;
     align-items: center;
     gap: 15px;
@@ -299,11 +349,23 @@
   .item.done .item-name span { background-size: 100% 1.5px; }
   .item-meta {
     margin-top: 5px;
+    line-height: 1.6;
+    letter-spacing: 0.1em;
     color: var(--ink-3);
     font-variant-numeric: tabular-nums;
     transition: color 0.26s ease;
   }
+  /* Wrap between the dose and the equipment, never inside either. */
+  .item-meta > span { white-space: nowrap; }
   .item.done .item-meta { color: var(--accent-2); }
+  .kit {
+    color: var(--clay);
+    transition: color 0.26s ease;
+  }
+  /* No separator glyph: the clay colour and the gap do the work, and a
+     leading dot looked stray whenever the line wrapped. */
+  .kit { margin-left: 11px; }
+  .item.done .kit { color: var(--accent-2); opacity: 0.8; }
 
   /* ---- footer ---- */
   .footer {
@@ -349,86 +411,96 @@
     <h1 class="serif">Today&rsquo;s <em>workout</em></h1>
     <div class="date caps" id="date"></div>
   </div>
-  <div class="score serif" id="score" role="progressbar" aria-valuemin="0" aria-valuemax="9" aria-valuenow="0" aria-label="Exercises completed">
-    <span class="score-done" id="scoreDone">0</span><span class="score-sep">/</span><span class="score-total" id="scoreTotal">9</span>
+  <div class="score serif" id="score" role="progressbar" aria-valuemin="0" aria-valuenow="0" aria-label="Exercises completed">
+    <span class="score-done" id="scoreDone">0</span><span class="score-sep">/</span><span class="score-total" id="scoreTotal">0</span>
   </div>
 </header>
 
 <div class="tally" id="tally" aria-hidden="true"></div>
 <div class="masthead-rule"></div>
 
+<div class="switch" id="switch" role="tablist" aria-label="Choose workout">
+  <div class="thumb" aria-hidden="true"></div>
+</div>
+
 <div class="stamp-wrap" id="stampWrap" aria-live="polite">
   <div class="stamp">Complete<small>Nice work</small></div>
 </div>
 
-<main id="groups"></main>
+<main id="days"></main>
 
 <div class="footer">
-  <button class="reset-btn caps" id="resetBtn">Reset checklist</button>
+  <button class="reset-btn caps" id="resetBtn">Reset day</button>
 </div>
 
 <script>
-  var groups = [
-    { title: 'Legs & glutes', items: [
-      { id: 'goblet-squat', name: 'Goblet squat', meta: '2 sets × 8–12' },
-      { id: 'reverse-lunges', name: 'Reverse lunges', meta: '2 sets × 8 each leg' },
-      { id: 'glute-bridge', name: 'Feet-elevated glute bridge', meta: '2 sets × 10–12' }
-    ]},
-    { title: 'Arms & carry', items: [
-      { id: 'bicep-curls', name: 'Bicep curls', meta: '2 sets × 10–12' },
-      { id: 'suitcase-carry', name: 'Suitcase carry', meta: '1 set each side × 30 sec' }
-    ]},
-    { title: 'Core', items: [
-      { id: 'front-plank', name: 'Front plank', meta: '2 sets × 20–40 sec' },
-      { id: 'side-plank', name: 'Side plank', meta: '1 set each side × 15–30 sec' }
-    ]},
-    { title: 'Drive & hips', items: [
-      { id: 'knee-drives', name: 'Knee drives', meta: '2 sets × 8 each leg' },
-      { id: 'abductions', name: 'Abductions', meta: '2 sets × 8 each leg' }
-    ]}
+  var days = [
+    {
+      key: 'a',
+      label: 'Day A',
+      focus: 'Legs & core',
+      items: [
+        { id: 'a-goblet-squat',    name: 'Goblet squat',               kit: 'Kettlebell',                 sets: '2–3 sets',        reps: '8–12' },
+        { id: 'a-romanian-dl',     name: 'Romanian deadlift',          kit: 'Both dumbbells',             sets: '2 sets',          reps: '8–10' },
+        { id: 'a-reverse-lunges',  name: 'Reverse lunges',             kit: 'Bodyweight or 1 dumbbell',   sets: '2 sets',          reps: '8 each leg' },
+        { id: 'a-glute-bridge',    name: 'Feet-elevated glute bridge', kit: 'Stepping block',             sets: '2 sets',          reps: '10–12' },
+        { id: 'a-front-plank',     name: 'Front plank',                kit: '',                           sets: '2 sets',          reps: '20–40 sec' },
+        { id: 'a-side-plank',      name: 'Side plank',                 kit: '',                           sets: '1 set each side', reps: '15–30 sec' },
+        { id: 'a-hip-abduction',   name: 'Side-lying hip abduction',   kit: '',                           sets: '2 sets each side',reps: '12–15' }
+      ]
+    },
+    {
+      key: 'b',
+      label: 'Day B',
+      focus: 'Upper, hips & core',
+      items: [
+        { id: 'b-single-arm-row',  name: 'Single-arm row',             kit: '1 dumbbell + block',         sets: '2 sets each side',reps: '8–10' },
+        { id: 'b-bicep-curls',     name: 'Bicep curls',                kit: 'Dumbbells (5kg)',            sets: '2 sets',          reps: '10–15' },
+        { id: 'b-knee-drives',     name: 'Standing knee drives',       kit: 'Bodyweight',                 sets: '2 sets each side',reps: '8, slow' },
+        { id: 'b-hip-abduction',   name: 'Side-lying hip abduction',   kit: '',                           sets: '2 sets each side',reps: '12–15' },
+        { id: 'b-suitcase-hold',   name: 'Suitcase hold',              kit: 'Kettlebell',                 sets: '1 set each side', reps: '30–45 sec' },
+        { id: 'b-front-plank',     name: 'Front plank',                kit: '',                           sets: '2 sets',          reps: '20–40 sec' }
+      ]
+    }
   ];
 
-  var exercises = groups.reduce(function(all, g) { return all.concat(g.items); }, []);
-  var TOTAL = exercises.length;
-  var STORAGE_KEY = 'workout-checklist-state';
+  var STORAGE_KEY = 'workout-checklist-state-v2';
+  var DAY_KEY = 'workout-checklist-day';
 
-  function loadState() {
+  function read(key, fallback) {
     try {
-      var raw = localStorage.getItem(STORAGE_KEY);
-      return raw ? JSON.parse(raw) : {};
+      var raw = localStorage.getItem(key);
+      return raw ? JSON.parse(raw) : fallback;
     } catch (e) {
-      return {};
+      return fallback;
     }
   }
 
-  function saveState(state) {
+  function write(key, value) {
     try {
-      localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+      localStorage.setItem(key, JSON.stringify(value));
     } catch (e) {}
   }
 
-  var state = loadState();
+  var state = read(STORAGE_KEY, {});
+  var savedDay = read(DAY_KEY, 'a');
+  var current = days.filter(function(d) { return d.key === savedDay; })[0] || days[0];
 
-  var groupsEl = document.getElementById('groups');
+  var daysEl = document.getElementById('days');
   var tallyEl = document.getElementById('tally');
+  var switchEl = document.getElementById('switch');
   var scoreEl = document.getElementById('score');
   var scoreDone = document.getElementById('scoreDone');
+  var scoreTotal = document.getElementById('scoreTotal');
   var stampWrap = document.getElementById('stampWrap');
   var resetBtn = document.getElementById('resetBtn');
   var nodes = {};
-  var groupNodes = [];
-  var ticks = [];
 
   document.getElementById('date').textContent =
     new Date().toLocaleDateString(undefined, { weekday: 'long', day: 'numeric', month: 'long' });
-  document.getElementById('scoreTotal').textContent = TOTAL;
-  scoreEl.setAttribute('aria-valuemax', TOTAL);
 
-  for (var t = 0; t < TOTAL; t++) {
-    var tick = document.createElement('div');
-    tick.className = 'tick';
-    tallyEl.appendChild(tick);
-    ticks.push(tick);
+  function doneCount(day) {
+    return day.items.filter(function(ex) { return state[ex.id]; }).length;
   }
 
   function buildItem(ex, index) {
@@ -442,7 +514,7 @@
     num.className = 'num';
     var numText = document.createElement('span');
     numText.className = 'num-text serif';
-    numText.textContent = index + 1 < 10 ? '0' + (index + 1) : String(index + 1);
+    numText.textContent = '0' + (index + 1);
     num.appendChild(numText);
     num.insertAdjacentHTML('beforeend',
       '<svg viewBox="0 0 24 24" aria-hidden="true">' +
@@ -450,23 +522,35 @@
 
     var textWrap = document.createElement('div');
     textWrap.className = 'item-text';
+
     var nameEl = document.createElement('div');
     nameEl.className = 'item-name';
     var nameSpan = document.createElement('span');
     nameSpan.textContent = ex.name;
     nameEl.appendChild(nameSpan);
+
     var metaEl = document.createElement('div');
     metaEl.className = 'item-meta caps';
-    metaEl.textContent = ex.meta;
+    var doseEl = document.createElement('span');
+    doseEl.textContent = ex.sets + ' × ' + ex.reps;
+    metaEl.appendChild(doseEl);
+    if (ex.kit) {
+      // A real space here is the only place the meta line may break.
+      metaEl.appendChild(document.createTextNode(' '));
+      var kitEl = document.createElement('span');
+      kitEl.className = 'kit';
+      kitEl.textContent = ex.kit;
+      metaEl.appendChild(kitEl);
+    }
+
     textWrap.appendChild(nameEl);
     textWrap.appendChild(metaEl);
-
     item.appendChild(num);
     item.appendChild(textWrap);
 
     function toggle() {
       state[ex.id] = !state[ex.id];
-      saveState(state);
+      write(STORAGE_KEY, state);
       syncItem(ex);
       syncProgress();
     }
@@ -487,60 +571,122 @@
     var item = nodes[ex.id];
     item.classList.toggle('done', isDone);
     item.setAttribute('aria-checked', isDone ? 'true' : 'false');
-    item.setAttribute('aria-label', ex.name + ', ' + ex.meta);
+    item.setAttribute('aria-label', ex.name + ', ' + ex.sets + ' by ' + ex.reps +
+      (ex.kit ? ', ' + ex.kit : ''));
   }
 
   function syncProgress() {
-    var doneCount = exercises.filter(function(ex) { return state[ex.id]; }).length;
+    var done = doneCount(current);
+    var total = current.items.length;
 
-    scoreDone.textContent = doneCount;
-    scoreEl.setAttribute('aria-valuenow', doneCount);
-    ticks.forEach(function(tick, i) { tick.classList.toggle('on', i < doneCount); });
+    scoreDone.textContent = done;
+    scoreTotal.textContent = total;
+    scoreEl.setAttribute('aria-valuenow', done);
+    scoreEl.setAttribute('aria-valuemax', total);
 
-    groupNodes.forEach(function(g) {
-      var done = g.group.items.filter(function(ex) { return state[ex.id]; }).length;
-      g.count.textContent = done + '/' + g.group.items.length;
-      g.section.classList.toggle('complete', done === g.group.items.length);
+    // The tally has one segment per exercise, and the two days differ in length.
+    while (tallyEl.children.length > total) tallyEl.removeChild(tallyEl.lastChild);
+    while (tallyEl.children.length < total) {
+      var tick = document.createElement('div');
+      tick.className = 'tick';
+      tallyEl.appendChild(tick);
+    }
+    Array.prototype.forEach.call(tallyEl.children, function(tick, i) {
+      tick.classList.toggle('on', i < done);
     });
 
-    stampWrap.classList.toggle('show', doneCount === TOTAL);
-    resetBtn.disabled = doneCount === 0;
+    days.forEach(function(day) {
+      day.tab.classList.toggle('complete', doneCount(day) === day.items.length);
+      day.panel.classList.toggle('complete', doneCount(day) === day.items.length);
+    });
+
+    stampWrap.classList.toggle('show', done === total);
+    resetBtn.disabled = done === 0;
+    resetBtn.textContent = 'Reset ' + current.label;
   }
 
-  var index = 0;
-  groups.forEach(function(group) {
-    var section = document.createElement('section');
-    section.className = 'group';
+  function selectDay(day, focusTab) {
+    current = day;
+    write(DAY_KEY, day.key);
+    switchEl.classList.toggle('b', day.key === 'b');
+
+    days.forEach(function(d) {
+      var active = d === day;
+      d.tab.setAttribute('aria-selected', active ? 'true' : 'false');
+      d.tab.setAttribute('tabindex', active ? '0' : '-1');
+      d.panel.classList.toggle('active', active);
+    });
+
+    // Replay the staggered entrance for the panel now on screen.
+    day.items.forEach(function(ex) {
+      var el = nodes[ex.id];
+      el.style.animation = 'none';
+      void el.offsetWidth;
+      el.style.animation = '';
+    });
+
+    if (focusTab) day.tab.focus();
+    syncProgress();
+  }
+
+  days.forEach(function(day, dayIndex) {
+    var tab = document.createElement('button');
+    tab.className = 'caps';
+    tab.setAttribute('role', 'tab');
+    tab.setAttribute('id', 'tab-' + day.key);
+    tab.setAttribute('aria-controls', 'panel-' + day.key);
+    tab.innerHTML = '';
+    tab.appendChild(document.createTextNode(day.label));
+    var mark = document.createElement('span');
+    mark.className = 'day-done';
+    mark.textContent = '✓';
+    mark.setAttribute('aria-hidden', 'true');
+    tab.appendChild(mark);
+    switchEl.appendChild(tab);
+
+    var panel = document.createElement('section');
+    panel.className = 'day';
+    panel.setAttribute('id', 'panel-' + day.key);
+    panel.setAttribute('role', 'tabpanel');
+    panel.setAttribute('aria-labelledby', 'tab-' + day.key);
 
     var head = document.createElement('div');
-    head.className = 'group-head';
-    var heading = document.createElement('h2');
-    heading.className = 'group-title caps';
-    heading.textContent = group.title;
+    head.className = 'day-head';
+    var focus = document.createElement('h2');
+    focus.className = 'day-focus caps';
+    focus.textContent = day.focus;
     var line = document.createElement('div');
     line.className = 'line';
     var count = document.createElement('div');
-    count.className = 'group-count';
-    head.appendChild(heading);
+    count.className = 'day-count';
+    count.textContent = day.items.length + ' exercises';
+    head.appendChild(focus);
     head.appendChild(line);
     head.appendChild(count);
-    section.appendChild(head);
+    panel.appendChild(head);
 
-    group.items.forEach(function(ex) {
-      section.appendChild(buildItem(ex, index++));
+    day.items.forEach(function(ex, i) { panel.appendChild(buildItem(ex, i)); });
+    daysEl.appendChild(panel);
+
+    day.tab = tab;
+    day.panel = panel;
+
+    tab.addEventListener('click', function() { selectDay(day, false); });
+    tab.addEventListener('keydown', function(e) {
+      if (e.key === 'ArrowRight' || e.key === 'ArrowLeft') {
+        e.preventDefault();
+        selectDay(days[(dayIndex + 1) % days.length], true);
+      }
     });
-
-    groupsEl.appendChild(section);
-    groupNodes.push({ group: group, section: section, count: count });
   });
 
-  exercises.forEach(syncItem);
-  syncProgress();
+  days.forEach(function(day) { day.items.forEach(syncItem); });
+  selectDay(current, false);
 
   resetBtn.addEventListener('click', function() {
-    state = {};
-    saveState(state);
-    exercises.forEach(syncItem);
+    current.items.forEach(function(ex) { delete state[ex.id]; });
+    write(STORAGE_KEY, state);
+    current.items.forEach(syncItem);
     syncProgress();
   });
 </script>
